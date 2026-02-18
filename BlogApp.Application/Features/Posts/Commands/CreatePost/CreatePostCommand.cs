@@ -1,3 +1,4 @@
+using BlogApp.Application.DTOs;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.CreatePost;

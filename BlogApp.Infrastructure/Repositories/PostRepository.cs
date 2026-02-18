@@ -1,6 +1,7 @@
 using BlogApp.Application.Interfaces.Repositories;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Infrastructure.Repositories;
 
@@ -10,6 +11,13 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
     {
        
     }
-    
-   
+
+    public async Task<Post> GetByIdWithCommentsAsync(int id)
+    {
+        var post = await _dbContext.Posts
+            .Include(p => p.Comments)
+            .FirstOrDefaultAsync(p => p.Id == id);
+        
+            return post;
+    }
 }

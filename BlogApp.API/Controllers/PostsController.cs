@@ -1,5 +1,6 @@
 using BlogApp.Application.Features.Posts.Commands.CreatePost;
 using BlogApp.Application.Features.Posts.Queries.GetAllPosts;
+using BlogApp.Application.Features.Posts.Queries.GetPostDetail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +31,14 @@ public class PostsController : ControllerBase
     {
         var result = await _mediator.Send(command);
 
+        return Ok(result);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var query = new GetPostDetailQuery(id);
+        var result = await _mediator.Send(query);
         return Ok(result);
     }
 }
