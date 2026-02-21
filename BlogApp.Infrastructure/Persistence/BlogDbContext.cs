@@ -1,10 +1,11 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Infrastructure.Persistence;
 
-public class BlogDbContext: DbContext
+public class BlogDbContext: IdentityDbContext<AppUser>
 {
     
     public BlogDbContext(DbContextOptions<BlogDbContext> options) : base(options)

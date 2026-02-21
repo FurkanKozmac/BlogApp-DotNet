@@ -2,12 +2,14 @@ using BlogApp.Application.Features.Posts.Commands.CreatePost;
 using BlogApp.Application.Features.Posts.Queries.GetAllPosts;
 using BlogApp.Application.Features.Posts.Queries.GetPostDetail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class PostsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -27,10 +29,13 @@ public class PostsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreatePostCommand command)
+    public async Task<IActionResult> Create(CreatePostCommand command)
     {
-        var result = await _mediator.Send(command);
+        var userName = User.Identity?.Name; 
+        
+        command.Author = userName ?? "Anonymous";
 
+        var result = await _mediator.Send(command);
         return Ok(result);
     }
     
