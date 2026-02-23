@@ -9,4 +9,7 @@ public sealed class Post : BaseEntity
     public string Author { get; set; } = String.Empty;
 
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    
+    public int? CategoryId { get; set; } // Foreign Key
+    public Category? Category { get; set; } = null!; // Navigation Property
 }

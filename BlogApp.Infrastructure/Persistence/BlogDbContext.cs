@@ -14,6 +14,7 @@ public class BlogDbContext: IdentityDbContext<AppUser>
     
     public DbSet<Post> Posts { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -30,6 +31,15 @@ public class BlogDbContext: IdentityDbContext<AppUser>
             }
         }
         return base.SaveChangesAsync(cancellationToken);
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<Post>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
+        modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsDeleted);
     }
     
 }

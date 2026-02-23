@@ -11,13 +11,12 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<Post, PostDto>().ReverseMap();
-
         CreateMap<CreatePostCommand, Post>();
-
         CreateMap<Comment, CommentDto>().ReverseMap();
-
         CreateMap<CreateCommentCommand, Comment>();
-        
         CreateMap<Post, PostDetailDto>();
+        CreateMap<Category, CategoryDto>().ReverseMap();
+        CreateMap<Post, PostDto>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
     }
 }

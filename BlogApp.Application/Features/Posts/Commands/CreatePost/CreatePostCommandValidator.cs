@@ -13,9 +13,5 @@ public class CreatePostCommandValidator : AbstractValidator<CreatePostCommand>
 
         RuleFor(p => p.Content)
             .NotEmpty().WithMessage("Content can't be empty.");
-
-        // Will be deleted after auth is added.
-        RuleFor(p => p.Author)
-            .NotEmpty().WithMessage("Author can't be empty.");
     }
 }

@@ -1,4 +1,6 @@
 using BlogApp.Application.Features.Posts.Commands.CreatePost;
+using BlogApp.Application.Features.Posts.Commands.DeletePost;
+using BlogApp.Application.Features.Posts.Commands.UpdatePost;
 using BlogApp.Application.Features.Posts.Queries.GetAllPosts;
 using BlogApp.Application.Features.Posts.Queries.GetPostDetail;
 using MediatR;
@@ -20,11 +22,10 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllPosts()
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAll([FromQuery] GetAllPostsQuery query)
     {
-        var query = new GetAllPostsQuery();
         var result = await _mediator.Send(query);
-
         return Ok(result);
     }
 
@@ -45,5 +46,19 @@ public class PostsController : ControllerBase
         var query = new GetPostDetailQuery(id);
         var result = await _mediator.Send(query);
         return Ok(result);
+    }
+    
+    [HttpPut]
+    public async Task<IActionResult> Update(UpdatePostCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return Ok("Post updated.");
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _mediator.Send(new DeletePostCommand(id));
+        return Ok("Post deleted.");
     }
 }

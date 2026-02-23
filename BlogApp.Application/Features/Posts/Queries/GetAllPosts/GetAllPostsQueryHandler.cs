@@ -1,4 +1,5 @@
 using AutoMapper;
+using BlogApp.Application.Common;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Interfaces.Repositories;
 using BlogApp.Domain.Entities;
@@ -6,7 +7,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetAllPosts;
 
-public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, List<PostDto>>
+public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, PagedResult<PostDto>>
 {
     private readonly IPostRepository _postRepository;
     private readonly IMapper _mapper;
@@ -17,12 +18,23 @@ public class GetAllPostsQueryHandler : IRequestHandler<GetAllPostsQuery, List<Po
         _mapper = mapper;
     }
 
-    public async Task<List<PostDto>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> Handle(GetAllPostsQuery request, CancellationToken cancellationToken)
     {
-        var posts = await _postRepository.GetAllAsync();
 
-        var result = _mapper.Map<List<PostDto>>(posts);
+        var allPosts = await _postRepository.GetAllWithCategoryAsync();
+        var queryablePosts = allPosts.Where(x => !x.IsDeleted).AsQueryable();
 
-        return result.OrderByDescending(x => x.CreatedDate).ToList();
+    
+        var totalCount = queryablePosts.Count();
+        
+        var pagedPosts = queryablePosts
+            .OrderByDescending(x => x.CreatedDate)
+            .Skip((request.PageNumber - 1) * request.PageSize) 
+            .Take(request.PageSize) 
+            .ToList();
+        
+        var dtos = _mapper.Map<List<PostDto>>(pagedPosts);
+        
+        return new PagedResult<PostDto>(dtos, totalCount, request.PageNumber, request.PageSize);
     }
 }

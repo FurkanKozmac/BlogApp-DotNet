@@ -20,4 +20,11 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
         
             return post;
     }
+    
+    public async Task<IReadOnlyList<Post>> GetAllWithCategoryAsync()
+    {
+        return await _dbContext.Posts
+            .Include(p => p.Category) // Kategoriyi JOIN yap
+            .ToListAsync();
+    }
 }
