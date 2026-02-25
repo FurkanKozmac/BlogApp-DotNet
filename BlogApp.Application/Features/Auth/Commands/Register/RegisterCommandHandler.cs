@@ -24,13 +24,15 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, bool>
 
         
         var result = await _userManager.CreateAsync(user, request.Password);
-
-        if (!result.Succeeded)
+        
+        if (result.Succeeded)
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new Exception($"Registration Failed: {errors}");
+            await _userManager.AddToRoleAsync(user, "User");
+            return true;
         }
-
-        return true;
+        
+        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        throw new Exception($"Registration Failed: {errors}");
+        
     }
 }

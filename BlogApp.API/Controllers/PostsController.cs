@@ -30,12 +30,8 @@ public class PostsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreatePostCommand command)
+    public async Task<IActionResult> Create([FromForm] CreatePostCommand command)
     {
-        var userName = User.Identity?.Name; 
-        
-        command.Author = userName ?? "Anonymous";
-
         var result = await _mediator.Send(command);
         return Ok(result);
     }

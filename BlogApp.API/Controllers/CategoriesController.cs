@@ -7,7 +7,7 @@ namespace BlogApp.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] 
+[Authorize(Roles = "Admin")] 
 public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;

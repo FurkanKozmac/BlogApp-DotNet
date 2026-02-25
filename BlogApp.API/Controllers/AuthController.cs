@@ -1,6 +1,7 @@
 using BlogApp.Application.Features.Auth.Commands.Login;
 using BlogApp.Application.Features.Auth.Commands.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers;
@@ -28,5 +29,13 @@ public class AuthController : ControllerBase
     {
         var token = await _mediator.Send(command);
         return Ok(new { Token = token });
+    }
+    
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize(Roles = "Admin")]
+    public class CategoriesController : ControllerBase
+    {
+        // ...
     }
 }

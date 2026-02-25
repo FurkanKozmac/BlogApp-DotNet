@@ -57,6 +57,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IFileService, FileService>();
         
         return services;
     }

@@ -20,4 +20,8 @@
     <ProjectReference Include="..\BlogApp.Infrastructure\BlogApp.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

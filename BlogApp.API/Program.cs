@@ -1,4 +1,5 @@
 using BlogApp.Application;
+using BlogApp.Application.Interfaces.Services;
 using BlogApp.Infrastructure;
 using Microsoft.OpenApi.Models;
 
@@ -37,6 +38,8 @@ builder.Services.AddSwaggerGen(opt =>
 });
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddScoped<ICurrentUserService, BlogApp.API.Services.CurrentUserService>();
 
 var app = builder.Build();
 
@@ -48,8 +51,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles(); 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -4,6 +4,7 @@ using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Infrastructure.Migrations
 {
     [DbContext(typeof(BlogDbContext))]
-    partial class BlogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225182744_IdentityTables")]
+    partial class IdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,9 +163,6 @@ namespace BlogApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -177,9 +177,6 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -191,8 +188,6 @@ namespace BlogApp.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("CategoryId");
 
@@ -359,15 +354,9 @@ namespace BlogApp.Infrastructure.Migrations
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
                 {
-                    b.HasOne("BlogApp.Domain.Entities.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("BlogApp.Domain.Entities.Category", "Category")
                         .WithMany("Posts")
                         .HasForeignKey("CategoryId");
-
-                    b.Navigation("AppUser");
 
                     b.Navigation("Category");
                 });
