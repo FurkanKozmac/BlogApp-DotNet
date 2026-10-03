@@ -171,4 +171,6 @@ Run tests with:
 dotnet test BlogApp.sln
 ```
 
-`.github/workflows/ci.yml` restores, builds, and tests the solution on pushes and pull requests using .NET 8.
+The projects target .NET 8, so the local machine needs the .NET 8 SDK and runtime for the plain command above. The CI workflow installs .NET 8 explicitly with `actions/setup-dotnet`; a machine with only .NET 10 cannot run the .NET 8 test host unless .NET 8 runtime is installed. The test project does not enable runtime roll-forward.
+
+`.github/workflows/ci.yml` restores, builds, and tests the solution on pushes and pull requests using .NET 8. Its configuration is reviewed in source; this statement does not claim a GitHub Actions run has succeeded.
