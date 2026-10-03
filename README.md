@@ -43,7 +43,7 @@ Application service interfaces (`IPostService`, `IAuthService`, `ICommentService
 - EF Core 8
 - ASP.NET Core Identity and JWT bearer authentication
 - FluentValidation
-- AutoMapper
+- Explicit DTO mapping in the application service implementations
 - Swashbuckle / Swagger UI
 
 ## Configuration
