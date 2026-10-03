@@ -1,9 +1,7 @@
-using AutoMapper;
 using BlogApp.Application.Common;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Interfaces.Repositories;
 using BlogApp.Application.Interfaces.Services;
-using BlogApp.Application.Mappings;
 using BlogApp.Application.Models.Requests;
 using BlogApp.Application.Validators;
 using BlogApp.Domain.Entities;
@@ -104,12 +102,8 @@ public class BlogPostServiceTests
 
     private static BlogPostService CreateService(FakePostRepository repository, ICurrentUserService currentUser)
     {
-        var mapper = new MapperConfiguration(configuration => configuration.AddProfile<MappingProfile>())
-            .CreateMapper();
-
         return new BlogPostService(
             repository,
-            mapper,
             currentUser,
             new FakeFileService(),
             new GetPostsRequestValidator(),

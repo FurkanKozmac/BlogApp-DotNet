@@ -1,4 +1,3 @@
-using AutoMapper;
 using BlogApp.Application.Common;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Interfaces.Repositories;
@@ -12,7 +11,6 @@ namespace BlogApp.Infrastructure.Services;
 public class BlogPostService : IPostService
 {
     private readonly IPostRepository _postRepository;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUserService;
     private readonly IFileService _fileService;
     private readonly IValidator<GetPostsRequest> _getPostsValidator;
@@ -21,7 +19,6 @@ public class BlogPostService : IPostService
 
     public BlogPostService(
         IPostRepository postRepository,
-        IMapper mapper,
         ICurrentUserService currentUserService,
         IFileService fileService,
         IValidator<GetPostsRequest> getPostsValidator,
@@ -29,7 +26,6 @@ public class BlogPostService : IPostService
         IValidator<UpdatePostRequest> updatePostValidator)
     {
         _postRepository = postRepository;
-        _mapper = mapper;
         _currentUserService = currentUserService;
         _fileService = fileService;
         _getPostsValidator = getPostsValidator;
@@ -41,7 +37,7 @@ public class BlogPostService : IPostService
     {
         await _getPostsValidator.ValidateAndThrowAsync(request, cancellationToken);
         var (posts, totalCount) = await _postRepository.GetPagedWithCategoryAsync(request.PageNumber, request.PageSize);
-        var items = _mapper.Map<List<PostDto>>(posts);
+        var items = posts.Select(ToPostDto).ToList();
 
         return new PagedResult<PostDto>(items, totalCount, request.PageNumber, request.PageSize);
     }
@@ -54,13 +50,18 @@ public class BlogPostService : IPostService
             throw new Exception("Post no exists.");
         }
 
-        return _mapper.Map<PostDetailDto>(post);
+        return ToPostDetailDto(post);
     }
 
     public async Task<int> CreateAsync(CreatePostRequest request, CancellationToken cancellationToken = default)
     {
         await _createPostValidator.ValidateAndThrowAsync(request, cancellationToken);
-        var post = _mapper.Map<Post>(request);
+        var post = new Post
+        {
+            Title = request.Title,
+            Content = request.Content,
+            CategoryId = request.CategoryId
+        };
         if (request.Image != null)
         {
             post.ImageUrl = await _fileService.UploadFileAsync(request.Image);
@@ -71,6 +72,35 @@ public class BlogPostService : IPostService
         await _postRepository.AddAsync(post);
         return post.Id;
     }
+
+    private static PostDto ToPostDto(Post post) => new()
+    {
+        Id = post.Id,
+        Title = post.Title,
+        Content = post.Content,
+        Author = post.Author,
+        CreatedDate = post.CreatedDate,
+        CategoryName = post.Category?.Name ?? string.Empty,
+        ImageUrl = post.ImageUrl
+    };
+
+    private static PostDetailDto ToPostDetailDto(Post post) => new()
+    {
+        Id = post.Id,
+        Title = post.Title,
+        Content = post.Content,
+        Author = post.Author,
+        CreatedDate = post.CreatedDate,
+        CategoryName = post.Category?.Name ?? string.Empty,
+        ImageUrl = post.ImageUrl,
+        Comments = post.Comments.Select(comment => new CommentDto
+        {
+            Id = comment.Id,
+            Text = comment.Text,
+            Author = comment.Author,
+            CreatedDate = comment.CreatedDate
+        }).ToList()
+    };
 
     public async Task UpdateAsync(UpdatePostRequest request, CancellationToken cancellationToken = default)
     {

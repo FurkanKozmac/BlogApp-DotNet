@@ -1,5 +1,4 @@
 using System.Reflection;
-using BlogApp.Application.Mappings;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,8 +11,6 @@ public static class ApplicationServiceRegistration
         var assembly = Assembly.GetExecutingAssembly();
         
         services.AddValidatorsFromAssembly(assembly);
-        services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
-        
         return services;
     }
     
