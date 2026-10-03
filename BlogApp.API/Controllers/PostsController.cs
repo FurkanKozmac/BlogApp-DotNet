@@ -1,9 +1,5 @@
-using BlogApp.Application.Features.Posts.Commands.CreatePost;
-using BlogApp.Application.Features.Posts.Commands.DeletePost;
-using BlogApp.Application.Features.Posts.Commands.UpdatePost;
-using BlogApp.Application.Features.Posts.Queries.GetAllPosts;
-using BlogApp.Application.Features.Posts.Queries.GetPostDetail;
-using MediatR;
+using BlogApp.Application.Interfaces.Services;
+using BlogApp.Application.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,47 +10,46 @@ namespace BlogApp.API.Controllers;
 [Authorize]
 public class PostsController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IPostService _postService;
 
-    public PostsController(IMediator mediator)
+    public PostsController(IPostService postService)
     {
-        _mediator = mediator;
+        _postService = postService;
     }
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAll([FromQuery] GetAllPostsQuery query)
+    public async Task<IActionResult> GetAll([FromQuery] GetPostsRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(query);
+        var result = await _postService.GetAllAsync(request, cancellationToken);
         return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm] CreatePostCommand command)
+    public async Task<IActionResult> Create([FromForm] CreatePostRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command);
-        return Ok(result);
+        var id = await _postService.CreateAsync(request, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
     
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetPostDetailQuery(id);
-        var result = await _mediator.Send(query);
+        var result = await _postService.GetByIdAsync(id, cancellationToken);
         return Ok(result);
     }
     
     [HttpPut]
-    public async Task<IActionResult> Update(UpdatePostCommand command)
+    public async Task<IActionResult> Update(UpdatePostRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command);
+        await _postService.UpdateAsync(request, cancellationToken);
         return Ok("Post updated.");
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new DeletePostCommand(id));
-        return Ok("Post deleted.");
+        await _postService.DeleteAsync(id, cancellationToken);
+        return NoContent();
     }
 }

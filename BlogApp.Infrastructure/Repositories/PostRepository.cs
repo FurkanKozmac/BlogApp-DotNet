@@ -12,7 +12,7 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
        
     }
 
-    public async Task<Post> GetByIdWithCommentsAsync(int id)
+    public async Task<Post?> GetByIdWithCommentsAsync(int id)
     {
         var post = await _dbContext.Posts
             .Include(p => p.Comments)
@@ -21,10 +21,20 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
             return post;
     }
     
-    public async Task<IReadOnlyList<Post>> GetAllWithCategoryAsync()
+    public async Task<(IReadOnlyList<Post> Items, int TotalCount)> GetPagedWithCategoryAsync(int pageNumber, int pageSize)
     {
-        return await _dbContext.Posts
-            .Include(p => p.Category) // Kategoriyi JOIN yap
+        var query = _dbContext.Posts
+            .AsNoTracking()
+            .Include(p => p.Category);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .OrderByDescending(post => post.CreatedDate)
+            .ThenByDescending(post => post.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (items, totalCount);
     }
 }
