@@ -7,7 +7,7 @@ namespace BlogApp.Tests.Validation;
 public class RequestValidatorTests
 {
     [Fact]
-    public void RegisterValidator_RejectsInvalidEmailAndShortPassword()
+    public void Register_WhenEmailOrPasswordIsInvalid_ValidatorReturnsErrors()
     {
         var validator = new RegisterRequestValidator();
         var result = validator.Validate(new RegisterRequest
@@ -24,7 +24,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public void LoginValidator_RejectsMissingCredentials()
+    public void Login_WhenCredentialsAreMissing_ValidatorReturnsErrors()
     {
         var result = new LoginRequestValidator().Validate(new LoginRequest());
 
@@ -34,11 +34,20 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public void CategoryValidator_RejectsEmptyName()
+    public void CreateCategory_WhenNameIsEmpty_ValidatorReturnsError()
     {
         var result = new CreateCategoryRequestValidator().Validate(new CreateCategoryRequest());
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateCategoryRequest.Name));
+    }
+
+    [Fact]
+    public void CreateComment_WhenTextIsEmpty_ValidatorReturnsError()
+    {
+        var result = new CreateCommentRequestValidator().Validate(new CreateCommentRequest { PostId = 1 });
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.PropertyName == nameof(CreateCommentRequest.Text));
     }
 }

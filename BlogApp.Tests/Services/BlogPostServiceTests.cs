@@ -15,7 +15,7 @@ namespace BlogApp.Tests.Services;
 public class BlogPostServiceTests
 {
     [Fact]
-    public async Task UpdateAsync_RejectsAnotherUsersPost()
+    public async Task UpdatePost_WhenUserIsNotOwner_ThrowsForbidden()
     {
         var repository = new FakePostRepository(
             new Post { Id = 1, AppUserId = "owner", Title = "Original", Content = "Content" });
@@ -32,7 +32,7 @@ public class BlogPostServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_RejectsInvalidRequestBeforeSaving()
+    public async Task CreatePost_WhenRequestIsInvalid_ThrowsValidationException()
     {
         var repository = new FakePostRepository();
         var service = CreateService(repository, new FakeCurrentUserService("user", isAdmin: false));
@@ -44,6 +44,25 @@ public class BlogPostServiceTests
         }));
 
         Assert.Equal(0, repository.AddCount);
+    }
+
+    [Fact]
+    public async Task UpdatePost_WhenUserIsAdmin_UpdatesAnotherUsersPost()
+    {
+        var repository = new FakePostRepository(
+            new Post { Id = 1, AppUserId = "owner", Title = "Original", Content = "Content" });
+        var service = CreateService(repository, new FakeCurrentUserService("admin", isAdmin: true));
+
+        await service.UpdateAsync(new UpdatePostRequest
+        {
+            Id = 1,
+            Title = "Updated title",
+            Content = "Updated content"
+        });
+
+        Assert.Equal(1, repository.UpdateCount);
+        Assert.Equal("Updated title", repository.Posts.Single().Title);
+        Assert.Equal("Updated content", repository.Posts.Single().Content);
     }
 
     [Fact]
@@ -69,7 +88,7 @@ public class BlogPostServiceTests
     [InlineData(1_000_001, 10)]
     [InlineData(1, 0)]
     [InlineData(1, 101)]
-    public async Task GetAllAsync_RejectsPaginationOutsideConfiguredBounds(int pageNumber, int pageSize)
+    public async Task GetPosts_WhenPageOrPageSizeIsInvalid_ThrowsValidationException(int pageNumber, int pageSize)
     {
         var repository = new FakePostRepository();
         var service = CreateService(repository, new FakeCurrentUserService("user", isAdmin: false));
@@ -84,7 +103,7 @@ public class BlogPostServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_PassesMaximumPageSizeToRepository()
+    public async Task GetPosts_WhenPageSizeIsAtMaximum_UsesRequestedPage()
     {
         var repository = new FakePostRepository();
         var service = CreateService(repository, new FakeCurrentUserService("user", isAdmin: false));
@@ -121,6 +140,7 @@ public class BlogPostServiceTests
         public int LastPageNumber { get; private set; }
         public int LastPageSize { get; private set; }
         public Post? SavedPost { get; private set; }
+        public IReadOnlyList<Post> Posts => _posts;
 
         public Task<IReadOnlyList<Post>> GetAllAsync() =>
             Task.FromResult<IReadOnlyList<Post>>(_posts);
