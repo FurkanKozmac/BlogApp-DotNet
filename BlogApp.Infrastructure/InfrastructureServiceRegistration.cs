@@ -34,6 +34,10 @@ public static class InfrastructureServiceRegistration
 
         var jwtSettings = configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["Secret"];
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException("JWT secret must be configured through a trusted configuration provider.");
+        }
 
         services.AddAuthentication(options =>
             {
@@ -50,11 +54,14 @@ public static class InfrastructureServiceRegistration
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSettings["Issuer"],
                     ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
                 };
             });
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IPostService, BlogPostService>();
+        services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IFileService, FileService>();

@@ -1,6 +1,7 @@
 
 using System.Net;
 using System.Text.Json;
+using BlogApp.Application.Common;
 using FluentValidation;
 
 namespace BlogApp.API.Middleware;
@@ -30,12 +31,22 @@ public class ExceptionMiddleware
     {
         context.Response.ContentType = "application/json";
         var statusCode = (int)HttpStatusCode.InternalServerError;
-        object errors = null;
+        object? errors = null;
         
         if (exception is ValidationException validationException)
         {
             statusCode = (int)HttpStatusCode.BadRequest;
             errors = validationException.Errors.Select(x => x.ErrorMessage);
+        }
+        else if (exception is InvalidCredentialsException)
+        {
+            statusCode = (int)HttpStatusCode.Unauthorized;
+            errors = exception.Message;
+        }
+        else if (exception is ForbiddenException)
+        {
+            statusCode = (int)HttpStatusCode.Forbidden;
+            errors = exception.Message;
         }
 
         var result = JsonSerializer.Serialize(new { 

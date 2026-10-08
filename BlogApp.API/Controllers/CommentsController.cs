@@ -1,25 +1,26 @@
-using BlogApp.Application.Features.Comments.Commands.CreateComment;
-using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
+using BlogApp.Application.Interfaces.Services;
+using BlogApp.Application.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class CommentsController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ICommentService _commentService;
 
-    public CommentsController(IMediator mediator)
+    public CommentsController(ICommentService commentService)
     {
-        _mediator = mediator;
+        _commentService = commentService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateCommentCommand command)
+    public async Task<IActionResult> Create(CreateCommentRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command);
-        return Ok(result);
+        var result = await _commentService.CreateAsync(request, cancellationToken);
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 }

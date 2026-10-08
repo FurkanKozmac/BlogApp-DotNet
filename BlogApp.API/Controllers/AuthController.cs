@@ -1,6 +1,5 @@
-using BlogApp.Application.Features.Auth.Commands.Login;
-using BlogApp.Application.Features.Auth.Commands.Register;
-using MediatR;
+using BlogApp.Application.Interfaces.Services;
+using BlogApp.Application.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,32 +9,24 @@ namespace BlogApp.API.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IAuthService _authService;
 
-    public AuthController(IMediator mediator)
+    public AuthController(IAuthService authService)
     {
-        _mediator = mediator;
+        _authService = authService;
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterCommand command)
+    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(command);
-        return Ok("Registration completed successfully.");
+        await _authService.RegisterAsync(request, cancellationToken);
+        return StatusCode(StatusCodes.Status201Created, "Registration completed successfully.");
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginCommand command)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
-        var token = await _mediator.Send(command);
+        var token = await _authService.LoginAsync(request, cancellationToken);
         return Ok(new { Token = token });
-    }
-    
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize(Roles = "Admin")]
-    public class CategoriesController : ControllerBase
-    {
-        // ...
     }
 }
